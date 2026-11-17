@@ -18,19 +18,30 @@ package org.apache.shiro.biz.cache.redis.serializer;
 import com.thoughtworks.xstream.XStream;
 import org.crazycake.shiro.exception.SerializationException;
 import org.crazycake.shiro.serializer.RedisSerializer;
+import java.nio.charset.StandardCharsets;
+
 @SuppressWarnings("unchecked")
 public class XstreamSerializer<T> implements RedisSerializer<T> {
 
-	protected  XStream xStream = new XStream();
+	protected XStream xStream;
+
+	public XstreamSerializer() {
+		this(new Class<?>[0]);
+	}
+
+	public XstreamSerializer(Class<?>... allowedTypes) {
+		xStream = new XStream();
+		xStream.allowTypes(allowedTypes);
+	}
 
 	@Override
 	public byte[] serialize(T source) throws SerializationException {
-		return xStream.toXML(source).getBytes();
+		return xStream.toXML(source).getBytes(StandardCharsets.UTF_8);
 	}
 
 	@Override
 	public T deserialize(byte[] bytes) throws SerializationException {
-		return (T) xStream.fromXML(new String(bytes));
+		return (T) xStream.fromXML(new String(bytes, StandardCharsets.UTF_8));
 	};
 
 }
